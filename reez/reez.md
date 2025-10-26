@@ -240,19 +240,19 @@ xmm0 chứa phần sau input mã hóa và được check bởi cs:xmmword_140029
 
 => xmmword_140029010 chừa flag sau được mã hóa
 
-key 
+**`key `**
 
-0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAh
+> 0AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAh
 
-xmmword_140029000
+**`xmmword_140029000`**
 
-0CBCCF5D9C3F5D9C3C2DEF5D3D8D8C5D9h 
+> 0CBCCF5D9C3F5D9C3C2DEF5D3D8D8C5D9h 
 
 => af_si_siht_yrros => sorry_this_is_fa
 
-xmmword_140029010
+**`xmmword_140029010`**
 
-8B8B8B8B8B8B8B8B8BCDCBC6CCF5CFC1h
+> 8B8B8B8B8B8B8B8B8BCDCBC6CCF5CFC1h
 
 => !!!!!!!!!galf_ek => ke_flag!!!!!!!!!
 
@@ -273,12 +273,19 @@ movaps  cs:xmmword_140029000, xmm0
 
 => thì ta thấy xmmword_140029010 được mov giá trị tại xmmword_14001E010 và xmmword_140029000 được mov giá trị tại xmmword_14001E000
 
+```
 xmmword_14001E000 xmmword 939FCF9C9B9998C99DC8C9989ECFCB9Ah
+```
+
 => part 1
+
+```
 xmmword_14001E010 xmmword 9F9D9D9DCB989A9B999A98CF9DCFCFCFh
+```
+
 => part 2
 
-flag :	0ae42cb7c2316e59eee7e203102a7775
+**`flag :	0ae42cb7c2316e59eee7e203102a7775`**
 
 > code xor:
 ```
