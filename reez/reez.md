@@ -261,6 +261,7 @@ flag : sorry_this_is_fake_flag!!!!!!!!!
 => đó không phải flag đúng 
 
 phần tích tĩnh thì ta thấy sub_140001210 cũng truy cập những hàm dùng xmmword_140029000 và xmmword_140029010 thì ta thấy 
+<img width="323" height="389" alt="image" src="https://github.com/user-attachments/assets/48154adf-853a-490d-8d67-ef9391548f99" />
 
 
 
