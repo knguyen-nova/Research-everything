@@ -255,7 +255,7 @@ flag : sorry_this_is_fake_flag!!!!!!!!!
 => đó không phải flag đúng 
 
 phần tích tĩnh thì ta thấy sub_140001210 cũng truy cập những hàm dùng xmmword_140029000 và xmmword_140029010 thì ta thấy 
-![image](https://hackmd.io/_uploads/B1Ykh3oCex.png)
+
 
 
 ```
