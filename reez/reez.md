@@ -90,11 +90,17 @@ if ( strlen(Str) != 32 )
 
 * lấy 32 byte mà  char Str có 16 byte thế nên nó sẽ trản bit . Vây câu hỏi là nó sẽ tràn vào đâu?
 * dựa trên mã giả mà chúng ta thu được bằng IDA thì ta có thể suy ra được vị trí mà nó sẽ tràn :+1: 
+
 >   _BYTE v8[32]; // [rsp+0h] [rbp-58h] BYREF
+
 >   char Str[16]; // [rsp+20h] [rbp-38h] BYREF
+
 >   __m128i v10; // [rsp+30h] [rbp-28h]
+
 >   __int64 v11; // [rsp+40h] [rbp-18h]
+
 >   __int64 v12; // [rsp+48h] [rbp-10h]
+
 >   
 Dựa trên rsp (rengister stack pointer ) và rbp (register base pointer ) thì ta sắp xếp được theo thứ tự giảm dần từ high address đến lower address:
 
@@ -113,7 +119,7 @@ dựa trên dữ liệu trên thì chúng ta có thể suy ra khi trản số th
 
 bỏ qua các trường hợp để check điều kiện nếu sai password thì ta thu được: 
 
-**`1`**
+**`---------------------------------------1---------------------------------------`**
 ```
 si128 = _mm_load_si128((const __m128i *)&xmmword_14001E030); 
 ```
@@ -128,7 +134,7 @@ tại xmmword_14001E030 chứa:
 
 =>dùng để lấy dữ liệu từ xmmword_14001E030 và chuyển vào si123 hay xmm0
 
-**`2`**
+**`---------------------------------------2---------------------------------------`**
 ```
 *(__m128i *)Str = _mm_xor_si128(_mm_load_si128((const __m128i *)Str), si128);
 ```
@@ -151,7 +157,7 @@ movdqa  xmmword ptr [rsp+58h+Str], xmm1
 => xmm1 hiện tại đang chứa phần đầu input vào được mã hóa 
 
 
-**`3`**
+**`---------------------------------------3---------------------------------------`**
 
 v10 = _mm_xor_si128(si128, v10);
 
@@ -168,7 +174,7 @@ movdqa  [rsp+58h+var_28], xmm0
 
 => xmm0 hiện tại đang chứa phần sau input vào được mã hóa
 
-**`4`**
+**`---------------------------------------4---------------------------------------`**
 ```
 if ( _mm_movemask_epi8(
          _mm_and_si128(
@@ -222,7 +228,7 @@ jz      short loc_1400010CA
 
 => đầy là đièu kiên để check cái mình nhập vào có đúng với flag mã hóa đã có không 
 
--Kết luận:
+**`------------------------------------Kêt luận ------------------------------------`**
 
 ta có
 
