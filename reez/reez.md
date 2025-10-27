@@ -154,7 +154,6 @@ movdqa  xmmword ptr [rsp+58h+Str], xmm1
 
 => có thể dùng key này để xor với flag đã mã hóa để ra flag
 
-=> xmm1 hiện tại đang chứa phần đầu input vào được mã hóa 
 
 
 **`---------------------------------------3---------------------------------------`**
@@ -172,7 +171,6 @@ movdqa  [rsp+58h+var_28], xmm0
 
 => kết quả lưu tại xmm0 và tại địa chỉ rsp+58h+var_28 - v10
 
-=> xmm0 hiện tại đang chứa phần sau input vào được mã hóa
 
 **`---------------------------------------4---------------------------------------`**
 ```
