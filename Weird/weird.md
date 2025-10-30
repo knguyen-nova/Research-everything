@@ -1,6 +1,6 @@
 
 Weird.png-HolaCTF 2025
---
+---
 > Date: Sep 18, 2025, 08:40 PM - 18/9/2025 :beaver: 
 > 
 > Purpose : writeup  :heart_eyes: 
