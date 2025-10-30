@@ -154,7 +154,6 @@ movdqa  xmmword ptr [rsp+58h+Str], xmm1
 
 => có thể dùng key này để xor với flag đã mã hóa để ra flag
 
-=> xmm1 hiện tại đang chứa phần đầu input vào được mã hóa 
 
 
 **`---------------------------------------3---------------------------------------`**
@@ -172,7 +171,6 @@ movdqa  [rsp+58h+var_28], xmm0
 
 => kết quả lưu tại xmm0 và tại địa chỉ rsp+58h+var_28 - v10
 
-=> xmm0 hiện tại đang chứa phần sau input vào được mã hóa
 
 **`---------------------------------------4---------------------------------------`**
 ```
@@ -261,6 +259,7 @@ flag : sorry_this_is_fake_flag!!!!!!!!!
 => đó không phải flag đúng 
 
 phần tích tĩnh thì ta thấy sub_140001210 cũng truy cập những hàm dùng xmmword_140029000 và xmmword_140029010 thì ta thấy 
+<img width="323" height="389" alt="image" src="https://github.com/user-attachments/assets/48154adf-853a-490d-8d67-ef9391548f99" />
 
 
 
