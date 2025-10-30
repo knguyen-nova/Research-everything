@@ -270,23 +270,23 @@ movaps  xmm0, cs:xmmword_14001E000
 movaps  cs:xmmword_140029000, xmm0
 ```
 
-=> thì ta thấy xmmword_140029010 được mov giá trị tại xmmword_14001E010 và xmmword_140029000 được mov giá trị tại xmmword_14001E000
+=> Thì ta thấy xmmword_140029010 được mov giá trị tại xmmword_14001E010 và xmmword_140029000 được mov giá trị tại xmmword_14001E000
 
 ```
 xmmword_14001E000 xmmword 939FCF9C9B9998C99DC8C9989ECFCB9Ah
 ```
 
-=> part 1
+=> Nữa flag đầu  
 
 ```
 xmmword_14001E010 xmmword 9F9D9D9DCB989A9B999A98CF9DCFCFCFh
 ```
 
-=> part 2
+=> Nữa flag sau 
 
 **`flag :	0ae42cb7c2316e59eee7e203102a7775`**
 
-> code xor:
+> Code xor:
 ```
 import binascii
 key = binascii.unhexlify("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
