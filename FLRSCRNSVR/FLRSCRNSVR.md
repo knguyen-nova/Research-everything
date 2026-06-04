@@ -1,15 +1,15 @@
 
 ---
->Date: 4/6/2026 :beaver: 
-> 
-> Purpose : Analysis  FLRSCRNSVR .src
-> 
-> Owner: Khoi nguyen - Nova :dragon_face: 
+> Date: 4/6/2026 :beaver:   
+> Purpose : Understand FLRSCRNSVR.SRC Execution Flow and Get Flag  
+> Owner: Khoi nguyen - Nova :dragon_face:   
+> Tools reverse : Ghidra   
+> Challenge from crackme-ctf-2026: https://github.com/crackmesone/ctf-2026-challenges-public/tree/main/FLRSCRNSVR  
+> Target: FLRSCRNSVR.SRC  
+> Platform: Windows  
+--- 
 
----
-
-<p align = "center" style = "color:red"> Info </p>
-
+<p align = "center" style = "color:red"> Info file </p>
 
 
 File name `FLRSCRNSVR.src`  
@@ -24,13 +24,12 @@ Test file :<!-- ![Database](images/test-1.png) -->
 
 file FLRSCRNSVR.SCR  
 => `FLRSCRNSVR.SCR: PE32+ executable (GUI) x86-64, for MS Windows `  
-=> file .src is file Screen Saver   
-=>Trình bảo vệ màn hình   
+=> file .scr is file Screen Saver   
+=> Trình bảo vệ màn hình   
 => Like file .exe it can run  
-=>Diffirent is window use .src to know screensaver  
 => When pc not use window will run screensaver  
 
-<p align = "left" style = "color:#4A90E2">Import</p>
+<p align = "center" style = "color:#4A90E2">Import</p>
 
 ```
 -----
@@ -67,28 +66,35 @@ VCRUNTIME140.DLL
  -----
 ```
 
-=> Lib for VSC => file make by MSVC
-`KERNEL32.DLL`
-=> Lib core system API of Windows
-`USER32.DLL`
-=> GUI for user => Use to create frame
-`GDI32.DLL`
-=> Graphics Device Interface
-=> Dùng để vẽ đồ họa mà không cần biết phần cứng bên dưới 
-=> Nó có thể vẽ đường thẳng, hình chữ nhật, pixel, ...
-=> Hiện chữ
-=> Xử lý hình ảnh
-`MSIMG32.DLL`
-=>  Lib xử lý hình ảnh , hiệu ứng đồ họa,  hình ảnh 
+=> Lib for VSC   
+=> file make by MSVC  
 
-<p align = "left" style = "color:#4A90E2"> Defined Strings</p>
+`KERNEL32.DLL`  
+=> Lib core system API of Windows  
+`USER32.DLL`  
+=> GUI for user => Use to create frame  
+`GDI32.DLL`  
+=> Graphics Device Interface  
+=> Dùng để vẽ đồ họa mà không cần biết phần cứng bên dưới   
+=> Nó có thể vẽ đường thẳng, hình chữ nhật, pixel, ...  
+=> Hiện chữ  
+=> Xử lý hình ảnh  
+`MSIMG32.DLL`  
+=>  Lib xử lý hình ảnh , hiệu ứng đồ họa,  hình ảnh   
 
-I found some string very suspect:
-    -str1:
-![Database](images/define_str_1.png)
-    -str2:
+<p align = "center" style = "color:#4A90E2"> Defined Strings</p>
+
+I found some string very suspect:  
+-str1:  
+
+![Database](images/define_str_1.png)  
+
+-str2:  
+
 ![Database](images/define_str_2.png)
-    -str3:
+
+-str3:  
+
 ![Database](images/define_str_3.png)
 
 Check function used with each string i found:
@@ -286,7 +292,7 @@ void FUN_140001300(longlong param_1)
 }
 
 ```
-I found:
+Clear code i have   
 ```c
 str1:
 wcscpy_s(str_1,0x50,L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP");
@@ -320,16 +326,18 @@ if (len_input != 0) {
   } while (i < len_input);
 }
 ```
-We run step by step with i = 0 :
-`addr_i_str1 = wcschr(str_1,*(wchar_t *)(input + 0 * 2 )); `
-=>wchar_t is 2 byte 
-=> `(input + i * 2)` cover to `(wchar_t *) ` so that maybe like this `wchar_t * input[]; `
-=> `addr_i_str1 = wcschr(str_1,input[0]); `
+We run step by step with i = 0 :  
+`addr_i_str1 = wcschr(str_1,*(wchar_t *)(input + 0 * 2 )); `  
+=>wchar_t is 2 byte   
+=> `(input + i * 2)` cover to `(wchar_t *) ` so that maybe like this `wchar_t * input[]; `  
+=> `addr_i_str1 = wcschr(str_1,input[0]); `  
 => `wcschr` will return address of the first character of `str_1` match will `input[0]`
-`*(wchar_t *)(input + 0 * 2)` = `str_2[(longlong)addr_i_str1 - (longlong)str_1 >> 1];`
-=> `addr_i_str1 - str_1 >>1 ` is  calculate offset of addr_i_str1 and /2 to find index of addr_i_str1 
+
+`*(wchar_t *)(input + 0 * 2)` = `str_2[(longlong)addr_i_str1 - (longlong)str_1 >> 1];`  
+=> `addr_i_str1 - str_1 >>1 ` is  calculate offset of addr_i_str1 and /2 to find index of addr_i_str1   
 => `input[0] = str_2[index of char input[0] in str_1]`
-***=>*** it will mapping each character of input to new character by find it index in `str_1` and replancing it with char in the same povision in `str_2` 
+
+***=>*** it will mapping each character of input to new character by find it index in `str_1` and replancing it with char in the same povision in `str_2`   
 
 ```c
 short str_FLARE [12];
@@ -360,17 +368,18 @@ if (len_input != 0) {
 ```
 => `0x464c41524552414c46` <=> FLARERALF
 
-We run step by step with i = 0 :
-`input_xor = (ushort *)(input + 0 * 2);`
-=> `(input + i * 2) conver to (ushort *)` <=>`ushort*  input[]`
-=> `input_xor  = &input[0]` 
+We run step by step with i = 0 :  
+`input_xor = (ushort *)(input + 0 * 2);`  
+=> `(input + i * 2) conver to (ushort *)` <=>`ushort*  input[]`  
+=> `input_xor  = &input[0]`   
 
-`*input_xor = *input_xor ^ (short)0 + str_FLARE[0 % len_FLARE];`
-=> `*input_xor = input[0]`
-=> `(short)0` = 0 in logic
-=>` str_FLARE[0 % len_FLARE]` =`str_FLARE[0]`= `0x46`
-=>`*input_xor  = *input_xor ^ (0 +0x46)`
-**=>**  It xor each value of `input` with each value of `str_FLARE + i`
+`*input_xor = *input_xor ^ (short)0 + str_FLARE[0 % len_FLARE];`  
+=> `*input_xor = input[0]`  
+=> `(short)0` = 0 in logic    
+=>` str_FLARE[0 % len_FLARE]` =`str_FLARE[0]`= `0x46`  
+=>`*input_xor  = *input_xor ^ (0 +0x46)`  
+
+**=>**  It xor each value of `input` with each value of `str_FLARE + i`  
 ```c
 if (len_input >> 1 != 0) {
   last_input = (undefined2 *)(input + -2 + len_input * 2);
@@ -383,21 +392,21 @@ if (len_input >> 1 != 0) {
   } while (i_0 < len_input >> 1);
 }
 ```
-`last_input = (undefined2 *)(input + -2 + len_input * 2);`
-=>`last_input = &input[len_input -1];`
+`last_input = (undefined2 *)(input + -2 + len_input * 2);`  
+=>`last_input = &input[len_input -1];`  
 
-`input_2 = *(undefined2 *)(input + i_0 * 2);`
-=>` input_2 = input[i_0];`
+`input_2 = *(undefined2 *)(input + i_0 * 2);`  
+=>` input_2 = input[i_0];`  
 
-`*(undefined2 *)(input + i_0 * 2) = *last_input;`
-=> `input[i_0] = input[len_input -1];`
+`*(undefined2 *)(input + i_0 * 2) = *last_input;`  
+=> `input[i_0] = input[len_input -1];`  
 
-`*last_input = input_2;`
-=> `input[len_input -1] = input[i_0];`
+`*last_input = input_2;`  
+=> `input[len_input -1] = input[i_0];`  
 
-**=>** reverse
+**=>** this code used to reverse input
 
-Summary this function we have:
+Summary this function we have:  
 
 ```c
 void handling_input(longlong input){
@@ -463,17 +472,16 @@ void handling_input(longlong input){
 }
 ```
 
-<p align = "left" style = "color:#4A90E2"> Symbol table </p>
+<p align = "center" style = "color:#4A90E2"> Symbol table </p>
 
-Pass func of GDI because GDI is handle Graphics
-Check func suspect we found :
+I check Symbol table, pass func of GDI because GDI is handle Graphics and i discover func suspect:    
 ![symbol-table-wcsncmp](images/symbol-table-wcsncmp.png)
-wcsncmp
-=> Lib: API-MS-WIN-CRT-STRING-L1-1-0.DLL	
-=> Reference count 7
-=> I think it function is use to check some things
+wcsncmp  
+=> Lib: API-MS-WIN-CRT-STRING-L1-1-0.DLL	  
+=> Reference count 7  
+=> I think it function is use to check some things  
 
-Check Symbol references of wcsncmp we found:
+Check Symbol references of wcsncmp we found:  
 ![symbol-ref-wcsncmp](images/symbol-ref-wcsncmp.png)
 ```c
 void handle_command_line_argv(HINSTANCE param_1,undefined8 param_2,wchar_t *argv,int param_4)
@@ -699,10 +707,10 @@ void handle_command_line_argv(HINSTANCE param_1,undefined8 param_2,wchar_t *argv
   return;
 }
 ```
-=> It handling argv from command line because it have cmp with L"/c", L"/p", L"/s"
-=> after test  L"/c", L"/p", L"/s" we see /c have something so we will go deep in how it handle /c
+=> It handling argv from command line because it have cmp with L"/c", L"/p", L"/s"  
+=> after test  L"/c", L"/p", L"/s" we see /c have something so we will go deep in how it handle /c  
 
-Flow it we have
+Flow it we have  
 ```c
 r_cmp = wcsncmp(argv,L"/c",2);
 if ((r_cmp == 0) || (r_cmp = wcsncmp(argv,L"-c",2), r_cmp == 0)) {
@@ -712,7 +720,7 @@ if ((r_cmp == 0) || (r_cmp = wcsncmp(argv,L"-c",2), r_cmp == 0)) {
     DialogBoxParamW(param_1,(LPCWSTR)0x82,(HWND)0x0,handle_box_c,0);
   }
 ```
-check FUN_140001f30 we found
+check FUN_140001f30 we found  
 ```c
 void handle_box_c(HWND param_1,int param_2,short param_3)
 {
@@ -825,9 +833,9 @@ void handle_box_c(HWND param_1,int param_2,short param_3)
 
 ```
 
-=> it is handle dialog when user use /c
+=> it is handle dialog when user use /c  
 
-i clean up dump code and found :
+i clean up jurk code and rename value i have:  
 ```c
 void handle_box_c(HWND param_1,int param_2,short param_3)
 {
@@ -867,13 +875,37 @@ void handle_box_c(HWND param_1,int param_2,short param_3)
   }
   ......
 }
+
 ```
+I identified several core functions:
+
 SetDlgItemTextW  
+```c
+BOOL SetDlgItemTextW(
+  [in] HWND    hDlg,
+  [in] int     nIDDlgItem,
+  [in] LPCWSTR lpString
+);
+```
 => set new value   
-`RegCreateKeyExW((HKEY)0xffffffff80000001,L"Software\\FLRSCRNSVR",0,(LPWSTR)0x0,0, 0x20006,(LPSECURITY_ATTRIBUTES)0x0,&local_900,(LPDWORD)0x0);`
-=> open hkey user ...\Software\\FLRSCRNSVR if it have will return 0  
-RegSetValueExW   
-=> use to write or read value  
+
+RegCreateKeyExW  
+```c
+LSTATUS RegCreateKeyExW(
+  [in]            HKEY                        hKey,
+  [in]            LPCWSTR                     lpSubKey,
+                  DWORD                       Reserved,
+  [in, optional]  LPWSTR                      lpClass,
+  [in]            DWORD                       dwOptions,
+  [in]            REGSAM                      samDesired,
+  [in, optional]  const LPSECURITY_ATTRIBUTES lpSecurityAttributes,
+  [out]           PHKEY                       phkResult,
+  [out, optional] LPDWORD                     lpdwDisposition
+);
+```
+=> create if not exists or open registry key  
+
+RegSetValueExW      
 ```c
 LSTATUS RegSetValueExW(
   [in]           HKEY       hKey, 
@@ -884,89 +916,44 @@ LSTATUS RegSetValueExW(
   [in]           DWORD      cbData
 );
 ```
+
+=> use to write or read value    
+
 And we have:  
+`RegCreateKeyExW((HKEY)0xffffffff80000001,L"Software\\FLRSCRNSVR",0,(LPWSTR)0x0,0, 0x20006,(LPSECURITY_ATTRIBUTES)0x0,&local_900,(LPDWORD)0x0);`  
+=> open hkey user ...\Software\\FLRSCRNSVR if it have will return 0  
+
 `RegSetValueExW(local_900,L"Text",0,1,(BYTE *)&input_field,(int)lVar8 * 2 + 2);`  
 =>  Value Name is Text  
 => Value data is in (BYTE *) &input_field  
 => Value size is (int)lVar8 * 2 + 2 => to much large  
 => Write value input + dump data to value Text  
+
 `RegSetValueExW(local_900,L"Quak",0,1,"<",0x34);`  
 =>  Value Name is Quak  
 => Value data is in "<"  
 => Value size is 0x34 => 52  
+
+i traced Quak found : 
 ```c
-DAT_1400064d0
-1400064d0  3c                                ??                       3Ch    <
-1400064d1  00                                ??                       00h
-1400064d2  51                                ??                       51h    Q
-1400064d3  00                                ??                       00h
-1400064d4  6a                                ??                       6Ah    j
-1400064d5  00                                ??                       00h
-1400064d6  09                                ??                       09h
-1400064d7  00                                ??                       00h
-1400064d8  02                                ??                       02h
-1400064d9  00                                ??                       00h
-1400064da  07                                ??                       07h
-1400064db  00                                ??                       00h
-1400064dc  25                                ??                       25h    %
-1400064dd  00                                ??                       00h
-1400064de  03                                ??                       03h
-1400064df  00                                ??                       00h
-1400064e0  30                                ??                       30h    0
-1400064e1  00                                ??                       00h
-1400064e2  08                                ??                       08h
-1400064e3  00                                ??                       00h
-1400064e4  04                                ??                       04h
-1400064e5  00                                ??                       00h
-1400064e6  29                                ??                       29h    )
-1400064e7  00                                ??                       00h
-1400064e8  68                                ??                       68h    h
-1400064e9  00                                ??                       00h
-1400064ea  24                                ??                       24h    $
-1400064eb  00                                ??                       00h
-1400064ec  01                                ??                       01h
-1400064ed  00                                ??                       00h
-1400064ee  24                                ??                       24h    $
-1400064ef  00                                ??                       00h
-1400064f0  18                                ??                       18h
-1400064f1  00                                ??                       00h
-1400064f2  6b                                ??                       6Bh    k
-1400064f3  00                                ??                       00h
-1400064f4  77                                ??                       77h    w
-1400064f5  00                                ??                       00h
-1400064f6  0f                                 ??                       0Fh
-1400064f7  00                                ??                       00h
-1400064f8  70                                ??                       70h    p
-1400064f9  00                                ??                       00h
-1400064fa  36                                ??                       36h    6
-1400064fb  00                                ??                       00h
-1400064fc  02                                ??                       02h
-1400064fd  00                                ??                       00h
-1400064fe  0e                                ??                       0Eh 
-1400064ff  00                                ??                       00h
-140006500  0b                                ??                       0Bh
-140006501  00                                ??                       00h
-140006502  00                                ??                       00h
-140006503  00                                ??                       00h
-```
-=> Value size is 0x34 => 52 / 2 = 26 kí tự   
-```
 3c 00 51 00 6a 00 09 00 02 00 07 00 25 00 03 00 30 00 08 00 04 00 29 00 68 00 24 00 01 00 24 00 18 00 6b 00 77 00 0f 00 70 00 36 00 02 00 0e 00 0b 00 00 00 
 ```
-We have  
-`WM_INITDIALOG `message is:  
+=> Value size is 0x34 => 52 / 2 = 26 digit  
+
+We have `WM_INITDIALOG `message is:  
 ```c
 #define WM_INITDIALOG                   0x0110
 ```
 => send to dialog box before a dialog => use to initialize  
-So 0x0110 is WM_INITDIALOG:
+So 0x0110 is WM_INITDIALOG:  
+
 ```c
 if (param_2 == 0x110) {
   set_default_value_in(&input_field);
   SetDlgItemTextW(param_1,0x3e9,&input_field);
 }
 ```
-Analyse function `set_default_value_in`  
+we focus Analyse function `set_default_value_in`  
 
 Origin function
 ```c
@@ -1115,7 +1102,8 @@ void set_default_value_in(wchar_t *param_1)
 }
 ```
 
-Function after clear
+Function after clear  
+
 ```c
 void set_default_value_in(wchar_t *input)
 
@@ -1185,7 +1173,9 @@ void set_default_value_in(wchar_t *input)
   return;
 }
 ```
+
 We have:
+
 ```c
 LSTATUS RegQueryValueExW(
   [in]                HKEY    hKey,
@@ -1196,7 +1186,7 @@ LSTATUS RegQueryValueExW(
   [in, out, optional] LPDWORD lpcbData
 );
 ```
-=> RegQueryValueExW use to get data, type  by specified value name
+=> RegQueryValueExW use to get data, type  by specified value name  
 ```c
 tatus_key = RegOpenKeyExW((HKEY)0xffffffff80000001,L"Software\\FLRSCRNSVR",0,0x20019,&key_handle);
   if (status_key == 0) {
@@ -1215,8 +1205,8 @@ tatus_key = RegOpenKeyExW((HKEY)0xffffffff80000001,L"Software\\FLRSCRNSVR",0,0x2
 ```
 - Open key `HKEY_CURRENT_USER\Software\\FLRSCRNSVR` if have return 0 if it have  
 - next is open `Text Value` and store in `input`  
-- if `status_key of RegOpenKeyExW != 0` or `status_key of RegQueryValueExW != 0` or `len (input) == 0` will set `input = L"Crackmes.one"`
-=> So we input will replace by Text Value <=> `input` = `Text Value data`
+- if `status_key of RegOpenKeyExW != 0` or `status_key of RegQueryValueExW != 0` or `len (input) == 0` will set `input = L"Crackmes.one"`  
+=> So we input will replace by Text Value <=> `input` = `Text Value data`  
 ```c
  i = -1;
   do {
@@ -1252,9 +1242,9 @@ tatus_key = RegOpenKeyExW((HKEY)0xffffffff80000001,L"Software\\FLRSCRNSVR",0,0x2
     else {}
   }
 ```
-- Copy `input` to variable `str_input`
-- And use function `handling_input` to handle `str_input` 
-- And use function `create_value` to create value `quak_value`
+- Copy `input` to variable `str_input`  
+- And use function `handling_input` to handle `str_input`    
+- And use function `create_value` to create value `quak_value`  
 ```c
 void create_value(wchar_t *quak_value)
 {
@@ -1300,8 +1290,8 @@ if (wchar_1 == wchar_2) {
 }
 else {}
 ```
-=> It store `str_input` in `input_after_handle`
-=> Calculate offset 
+=> It store `str_input` in `input_after_handle`  
+=> Calculate offset   
 ```c
   wchar_1 = input_after_handle[0]
   wchar_2 = *(wchar_t *)(input_after_handle + offset); = quak_value[0]
@@ -1320,8 +1310,8 @@ do {
 
 ![database](images/FLRSCRNSVR.png)
 
-=> So we will reverse `Quak value` with funtion `handling_input` reverse
-Code python reverse Quak value 
+=> So we will reverse `Quak value` with funtion `handling_input` reverse  
+Code python reverse Quak value   
 ```python
 import struct 
 
@@ -1356,6 +1346,7 @@ print(f"Flare {flare_b} len = {len(flare_b)} \n")
 print(f"Quak xor Flare {xor_quak}\n" )
 print(f"Text Value =  {flag}")
 ```
+Result   
 ```c 
 Quak value 3c 00 51 00 6a 00 09 00 02 00 07 00 25 00 03 00 30 00 08 00 04 00 29 00 68 00 24 00 01 00 24 00 18 00 6b 00 77 00 0f 00 70 00 36 00 02 00 0e 00 0b 00  
  
