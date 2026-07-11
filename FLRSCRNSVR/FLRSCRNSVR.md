@@ -9,7 +9,7 @@
 > Platform: Windows  
 --- 
 
-<p align = "center" style = "color:red"> Info file </p>
+<p align = "center" style = "color:red"> Summary  </p>
 
 
 File name `FLRSCRNSVR.src`  
@@ -17,19 +17,33 @@ From crackme-ctf-2026
 Test file :<!-- ![Database](images/test-1.png) -->
 <img src = "images/test-1.png" >
 
+Overview how FLRSCRNSVR.src run 
+![database](images/FLRSCRNSVR.png)
+
 ---
 <p align = "center" style = "color:red">Analysis</p>
 
-<p align = "left" style = "color:#4A90E2">File type</p>
+<p align = "left" style = "color:#FF6C00">Recon</p>
 
-file FLRSCRNSVR.SCR  
+file FLRSCRNSVR.SCR   
+> Có thể dùng lệnh file để xác định loại của file bằng cách đọc nội dung header
+
 => `FLRSCRNSVR.SCR: PE32+ executable (GUI) x86-64, for MS Windows `  
 => file .scr is file Screen Saver   
 => Trình bảo vệ màn hình   
 => Like file .exe it can run  
 => When pc not use window will run screensaver  
 
-<p align = "center" style = "color:#4A90E2">Import</p>
+When i run file i only see dynamic images and no more any information 
+
+<p align = "left " style = "color:#FF6C00">Approach 1 : Establish context by function</p>
+
+<p align = "center" style = "color:#4A90E2">Analysis Imports in Symbol tree </p>
+
+> - Symbol tree là bảng tất cả các "ký hiệu" (symbols) mà Ghidra biết về chương trình, giúp bạn điều hướng nhanh đến các thành phần quan trọng.
+> - Imports in Symbol tree = Các thư viện ngoài mà chương trình đang dùng.  
+>   => ta có thể dùng những thông tin này để biết chương trình này làm cái gì 
+>   => ví dụ như là có USER32.DLL ta có thể suy ra là chương trình có dùng GUI, có API-MS-WIN-CRT-* và VCRUNTIME140 ta có thể suy ra chương trình có thể được biên dịch bằng Visual Studio
 
 ```
 -----
@@ -82,7 +96,11 @@ VCRUNTIME140.DLL
 `MSIMG32.DLL`  
 =>  Lib xử lý hình ảnh , hiệu ứng đồ họa,  hình ảnh   
 
-<p align = "center" style = "color:#4A90E2"> Defined Strings</p>
+<p align = "center" style = "color:#4A90E2"> Analysis Defined Strings</p>
+
+> Defined Strings là 1 chức năng trong ghidra là nơi tổng hợp tất cả các chuỗi (strings) mà Ghidra đã nhận diện và định nghĩa trong chương trình.
+>ta có tìm xem các chuỗi nào mà chương trình dùng hoặc là nếu chương trình không có thì ta có thể tìm các chuỗi nhìn giống thuật toán rồi xem thư 
+>=> ta xem XREF (Cross References) để biết hàm nào đang sử dụng chuỗi đó.
 
 I found some string very suspect:  
 -str1:  
@@ -97,7 +115,7 @@ I found some string very suspect:
 
 ![Database](images/define_str_3.png)
 
-Check function used with each string i found:
+Check function used with each string i found | check XREF (Cross References) :) :
 - str1:
 
 ```c
@@ -292,7 +310,7 @@ void FUN_140001300(longlong param_1)
 }
 
 ```
-Clear code i have   
+Clear Junk code i have   
 ```c
 str1:
 wcscpy_s(str_1,0x50,L"abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOP");
@@ -328,7 +346,7 @@ if (len_input != 0) {
 ```
 We run step by step with i = 0 :  
 `addr_i_str1 = wcschr(str_1,*(wchar_t *)(input + 0 * 2 )); `  
-=>wchar_t is 2 byte   
+=> wchar_t is 2 byte   
 => `(input + i * 2)` cover to `(wchar_t *) ` so that maybe like this `wchar_t * input[]; `  
 => `addr_i_str1 = wcschr(str_1,input[0]); `  
 => `wcschr` will return address of the first character of `str_1` match will `input[0]`
@@ -472,13 +490,17 @@ void handling_input(longlong input){
 }
 ```
 
-<p align = "center" style = "color:#4A90E2"> Symbol table </p>
+<p align = "center" style = "color:#4A90E2"> Analysis Symbol table </p>
+
+> Symbol Table = Bảng liệt kê chi tiết tất cả các symbol trong chương trình.
+> Trong Symbol Table  có chứa hàm,  Reference Count	chứa số lần nó được gọi tới và ta xem hàm nào khả nghi, hàm nào đưọc gọi nhiều nhất với cái đó thì ta có thể kiểm tra xem có gì hay đặc biệt không  
+> Lúc làm  mình nghĩa vì bài này là lấy flag nên có thể nó sẽ so sánh cái gì đó nên mình tìm các hàm so sánh trong đó xem và kiểm tra các hàm nào gọi hàm so sánh đó. Khi mình tìm thì mình thấy được 2 hàm rất khả nghi là wcsncmp để so sánh, wcscat_s	dùng để nối chuỗi 
 
 I check Symbol table, pass func of GDI because GDI is handle Graphics and i discover func suspect:    
 ![symbol-table-wcsncmp](images/symbol-table-wcsncmp.png)
 wcsncmp  
 => Lib: API-MS-WIN-CRT-STRING-L1-1-0.DLL	  
-=> Reference count 7  
+=> Reference count 7    
 => I think it function is use to check some things  
 
 Check Symbol references of wcsncmp we found:  
@@ -667,7 +689,8 @@ void handle_command_line_argv(HINSTANCE param_1,undefined8 param_2,wchar_t *argv
 }
 
 ```
-clear jurk code we have 
+
+Clear jurk code and rename function to easy read we have 
 ```c
 void handle_command_line_argv(HINSTANCE param_1,undefined8 param_2,wchar_t *argv,int param_4){
   local_48 = DAT_140008000 ^ (ulonglong)auStackY_588;
@@ -720,6 +743,7 @@ if ((r_cmp == 0) || (r_cmp = wcsncmp(argv,L"-c",2), r_cmp == 0)) {
     DialogBoxParamW(param_1,(LPCWSTR)0x82,(HWND)0x0,handle_box_c,0);
   }
 ```
+
 check FUN_140001f30 we found  
 ```c
 void handle_box_c(HWND param_1,int param_2,short param_3)
@@ -835,7 +859,7 @@ void handle_box_c(HWND param_1,int param_2,short param_3)
 
 => it is handle dialog when user use /c  
 
-i clean up jurk code and rename value i have:  
+i clean up jurk code and rename value to easy read :  
 ```c
 void handle_box_c(HWND param_1,int param_2,short param_3)
 {
@@ -877,6 +901,7 @@ void handle_box_c(HWND param_1,int param_2,short param_3)
 }
 
 ```
+
 I identified several core functions:
 
 SetDlgItemTextW  
@@ -1187,6 +1212,7 @@ LSTATUS RegQueryValueExW(
 );
 ```
 => RegQueryValueExW use to get data, type  by specified value name  
+
 ```c
 tatus_key = RegOpenKeyExW((HKEY)0xffffffff80000001,L"Software\\FLRSCRNSVR",0,0x20019,&key_handle);
   if (status_key == 0) {
@@ -1306,11 +1332,13 @@ do {
   i = i + 1;
 } while (wchar_2 != L'\0');
 ```
+
 <p align = "center" style = "color:red">Summary of flow we found </p>
 
 ![database](images/FLRSCRNSVR.png)
 
 => So we will reverse `Quak value` with funtion `handling_input` reverse  
+
 Code python reverse Quak value   
 ```python
 import struct 
@@ -1361,3 +1389,69 @@ Quak xor Flare [77, 67, 65, 99, 57, 88, 48, 56, 86, 107, 87, 104, 54, 123, 100, 
 Text Value =  CMO{frogt4s7ic_r3vers1ng}
 ```
 
+
+<p align = "left " style = "color:#FF6C00">Approach 2 : Establish context by start analysis entry </p>
+
+Funtion `entry` 
+
+![database](images/entry.png)
+
+Funtion `crt_entry` 
+```c
+int crt_entry(void)
+{
+  iVar4 = unaff_RBX;
+  status = FUN_140004954(1);
+  if (status == '\0') {
+    handle_error(7);
+  }
+  else {
+    bVar1 = false;
+    status = __scrt_acquire_startup_lock();
+    iVar4 = CONCAT71(unaff_RBX >> 8,status);
+    if (DAT_140008810 != 1) {
+      if (DAT_140008810 == 0) {
+        DAT_140008810 = 1;
+                    /* hàm khởi tạo toàn cục (Global Constructors) */
+        iVar4 = _initterm_e(&DAT_140006468,&DAT_140006480);
+        if (iVar4 != 0) {
+          return 0xff;
+        }
+        _initterm(&DAT_140006450);
+        DAT_140008810 = 2;
+      }
+      else {
+        bVar1 = true;
+      }
+      __scrt_release_startup_lock(status);
+      plVar5 = FUN_140004c64();
+      if ((*plVar5 != 0) && (uVar6 = FUN_140004a1c(plVar5), uVar6 != '\0')) {
+        (**plVar5)(0);
+      }
+      plVar5 = FUN_140004c6c();
+      if ((*plVar5 != 0) && (uVar6 = FUN_140004a1c(plVar5), uVar6 != '\0')) {
+        _register_thread_local_exe_atexit_callback(*plVar5);
+      }
+      WVar3 = __scrt_get_show_window_mode();
+      argv = _get_wide_winmain_command_line();
+      pIVar7 = &IMAGE_DOS_HEADER_140000000;
+      iVar4 = handle_command_line_argv(&IMAGE_DOS_HEADER_140000000,0,argv,WVar3);
+      bVar2 = IsManagedApp();
+      if (bVar2) {
+        if (!bVar1) {
+          _cexit();
+        }
+        __scrt_uninitialize_crt(CONCAT71(pIVar7 >> 8,1),'\0');
+        return iVar4;
+      }
+      goto LAB_1400048f1;
+    }
+  }
+  handle_error(7);
+LAB_1400048f1:
+  exit(iVar4);
+}
+```
+
+=> Call function  `handle_command_line_argv` to handle argv 
+=> Seach function  `handle_command_line_argv ` to know more 
