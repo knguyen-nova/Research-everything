@@ -1,0 +1,52 @@
+break *0x00402296
+  commands
+    echo \n--- ham audit ---\n
+  end
+break *0x004022a5
+  commands
+    echo \n create key \n
+  end
+break *0x00402314
+  commands
+    echo \n Create mem \n 
+  end
+break *0x00402335
+  commands
+    echo \n start loot set value mem \n
+  end
+break *0x004022d0
+  commands
+    echo \n Check len input 0x61 \n
+  end
+break *0x004023b0
+  commands
+    echo \n Finish loot set value mem and we can get value of mem here \n
+  end
+break *0x004023f0 
+  commands 
+    echo \n check 7 < uVar \n 
+  end
+break *0x004024fe
+  commands 
+    echo \n--- check len mem : (uVar1 < 0x1f5) ----\n
+  end
+break *0x00402416
+  commands
+    echo \n--- check mem[1] == 'Q' || 0x51  ---\n 
+  end 
+break *0x00402429 
+  commands 
+    echo \n--- start for with j = 3 ---\n 
+  end 
+break *0x004024a2
+  commands 
+    echo \n--- check (input_[i] == '\0' | JNZ LAB_004024b0 => true | LAB_004024ab :return 0 ---\n 
+  end
+break *0x0040243b
+  commands 
+    echo \n--- for(i=0; i<len(mem);i++) | JNC LAB_004025c3 => out for ---\n 
+  end
+break *0x004025b1
+  commands 
+    echo \n cmp constant_en \n 
+  end 
